@@ -34,3 +34,48 @@ class DocumentRead(BaseModel):
     chunk_count: int
     error_message: str | None
     created_at: datetime
+
+
+class Citation(BaseModel):
+    index: int
+    chunk_id: str
+    page_number: int | None
+    score: float
+    preview: str
+
+
+class MessageRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    chat_id: uuid.UUID
+    role: str
+    content: str
+    citations: str | None
+    created_at: datetime
+
+
+class ChatCreate(BaseModel):
+    document_id: uuid.UUID
+
+
+class ChatRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    document_id: uuid.UUID
+    title: str
+    created_at: datetime
+
+
+class ChatWithMessages(ChatRead):
+    messages: list[MessageRead]
+
+
+class AskRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=2000)
+
+
+class AskResponse(BaseModel):
+    user_message: MessageRead
+    assistant_message: MessageRead
