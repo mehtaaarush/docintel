@@ -17,3 +17,8 @@ python-docx
 faiss-cpu
 numpy
 google-genai
+pypdf
+python-docx
+faiss-cpu
+numpy
+google-genai

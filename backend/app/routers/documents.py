@@ -1,11 +1,11 @@
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import models, schemas, storage
+from app import models, processing, schemas, storage, vectorstore
 from app.config import settings
 from app.db import get_db
 
@@ -40,7 +40,7 @@ def create_document(payload: schemas.DocumentCreate, db: Session = Depends(get_d
 
 
 @router.post("/upload", response_model=schemas.DocumentRead, status_code=status.HTTP_201_CREATED)
-def upload_document(file: UploadFile = File(...), db: Session = Depends(get_db)):
+def upload_document(background: BackgroundTasks, file: UploadFile = File(...), db: Session = Depends(get_db)):
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in storage.ALLOWED_EXTENSIONS:
         raise HTTPException(
@@ -82,6 +82,7 @@ def upload_document(file: UploadFile = File(...), db: Session = Depends(get_db))
 
     db.commit()
     db.refresh(document)
+    background.add_task(processing.process_document, document.id)
     return document
 
 
@@ -110,5 +111,6 @@ def delete_document(document_id: uuid.UUID, db: Session = Depends(get_db)):
     if document is None:
         raise HTTPException(status_code=404, detail="Document not found")
     storage.delete_file(storage.build_stored_path(document.id, document.filename))
+    vectorstore.delete_index(document.id)
     db.delete(document)
     db.commit()
