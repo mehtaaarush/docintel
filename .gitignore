@@ -1,0 +1,24 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+.next/
+out/
+
+# Env & secrets
+.env
+.env.local
+*.env
+
+# Data
+uploads/
+*.faiss
+*.pkl
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
