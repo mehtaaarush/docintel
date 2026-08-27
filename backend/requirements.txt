@@ -7,3 +7,13 @@ alembic
 psycopg[binary]
 pydantic[email]
 python-multipart
+pypdf
+python-docx
+faiss-cpu
+numpy
+google-genai
+pypdf
+python-docx
+faiss-cpu
+numpy
+google-genai
