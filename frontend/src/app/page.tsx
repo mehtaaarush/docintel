@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,6 +11,8 @@ type Doc = {
   content_type: string;
   size_bytes: number;
   status: string;
+  chunk_count: number;
+  error_message: string | null;
   created_at: string;
 };
 
@@ -41,6 +44,13 @@ export default function Home() {
   useEffect(() => {
     loadDocs();
   }, [loadDocs]);
+
+  useEffect(() => {
+    const pending = docs.some((d) => d.status === "uploaded" || d.status === "processing");
+    if (!pending) return;
+    const timer = setInterval(loadDocs, 2000);
+    return () => clearInterval(timer);
+  }, [docs, loadDocs]);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -121,10 +131,24 @@ export default function Home() {
             {docs.map((doc) => (
               <li key={doc.id} className="flex items-center justify-between py-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm">{doc.filename}</p>
+                  {doc.status === "ready" ? (
+                    <Link
+                      href={`/documents/${doc.id}`}
+                      className="truncate text-sm underline-offset-4 hover:underline"
+                    >
+                      {doc.filename}
+                    </Link>
+                  ) : (
+                    <p className="truncate text-sm">{doc.filename}</p>
+                  )}
                   <p className="text-xs opacity-50">
                     {formatSize(doc.size_bytes)} - {doc.status}
+                    {doc.status === "ready" && ` - ${doc.chunk_count} chunks`}
+                    {doc.status === "processing" && " (indexing...)"}
                   </p>
+                  {doc.error_message && (
+                    <p className="mt-1 text-xs text-red-400">{doc.error_message}</p>
+                  )}
                 </div>
                 <button
                   onClick={() => handleDelete(doc.id)}
