@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://docintel:docintel@localhost:5432/docintel"
     google_api_key: str = ""
     cors_origins: str = "http://localhost:3000"
+    upload_dir: str = "uploads"
+    max_upload_mb: int = 20
 
     @property
     def cors_origins_list(self) -> list[str]:
