@@ -6,3 +6,4 @@ sqlalchemy
 alembic
 psycopg[binary]
 pydantic[email]
+python-multipart
